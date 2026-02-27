@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Orbital Alert</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #1e293b; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: 90%; max-width: 500px; }
+        button { background: #38bdf8; color: #0f172a; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        #output { margin-top: 25px; text-align: left; background: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; font-size: 13px; color: #7dd3fc; border: 1px solid #334155; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛰️ Orbital Alert</h1>
+        <p>Tracking ISS for Bengaluru</p>
+        <button onclick="fetchPasses()">Calculate Overpass</button>
+        <div id="output">Waiting for location...</div>
+    </div>
+
+    <script>
+        async function fetchPasses() {
+            const out = document.getElementById('output');
+            out.innerText = "Requesting GPS...";
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                out.innerText = "Analyzing orbits...";
+                try {
+                    const response = await fetch('http://localhost:8080', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            latitude: pos.coords.latitude,
+                            longitude: pos.coords.longitude
+                        })
+                    });
+                    out.innerText = await response.text();
+                } catch (err) {
+                    out.innerText = "Error: Python server is not running on localhost:8080";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
